@@ -18,11 +18,14 @@ public:
     std::list<Entity*> explosions;
     std::list<Entity*> debris;
     std::list<Entity*> fireballs;
+    std::list<Entity*> helicopters;
     Star stars[MAX_STARS];
 
-    SDL_Texture *bulletTexture, *obstacleTexture, *obstacleBulletTexture, *background, *explosionTexture, *fireballTexture;
+    SDL_Texture *bulletTexture, *obstacleTexture, *obstacleBulletTexture, *background, *explosionTexture, *fireballTexture, *menuTexture,
+    *playagainTexture1, *playagainTexture2, *resumeTexture1, *resumeTexture2, *quitTexture1, *quitTexture2, *helicopterTexture;
     int obstacleSpawnTimer;
     int fireballSpawnTimer;
+    int helicopterSpawntimer;
     int stageResetTimer;
 
     int backgroundX = 0;
@@ -38,15 +41,18 @@ public:
     void initStarfield();
     void fireBullet();
     void fireball();
-    void fireObstacleBullet(Entity* obstacle);
+    void helicopter();
+    void enemyfire(Entity* enemy);
     void doPlayer(int keyboard[]);
     bool bulletHitFighter(Entity* b);
     bool fireballHitFighter(Entity* b);
     void doBullets();
     void doObstacles();
     void doFireballs();
+    void doHelicopter();
     void spawnObstacles();
     void spawnFireballs();
+    void spawnHelicopter();
     void doFighters();
     void doBackground();
     void doStarfield();

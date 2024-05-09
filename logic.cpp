@@ -15,13 +15,20 @@ Game::~Game() {
 void Game::init(Graphics& graphics) {
     player.texture = graphics.loadTexture("img/slime.png");
     SDL_QueryTexture(player.texture, NULL, NULL, &player.w, &player.h);
-
     bulletTexture = graphics.loadTexture("img/tinyBlackBox.png");
     obstacleTexture = graphics.loadTexture("img/small_metal_spike.png");
     obstacleBulletTexture = graphics.loadTexture("img/obstacleBullet.png");
     background = graphics.loadTexture("img/1920x1080.png");
     explosionTexture = graphics.loadTexture("img/pngegg.png");
     fireballTexture = graphics.loadTexture(FIREBALL_SPRITE_FILE);
+    menuTexture = graphics.loadTexture("img/menu.png");
+    resumeTexture1 = graphics.loadTexture("img/resumeTexture1.png");
+    resumeTexture2 = graphics.loadTexture("img/resumeTexture2.png");
+    playagainTexture1 = graphics.loadTexture("img/playagainTexture1");
+    playagainTexture2 = graphics.loadTexture("img/playagainTexture2.png");
+    quitTexture1 = graphics.loadTexture("img/quitTexture1.png");
+    quitTexture2 = graphics.loadTexture("img/quitTexture2.png");
+    helicopterTexture = graphics.loadTexture(HELICOPTER_SPRITE_FILE);
     reset();
 }
 
@@ -53,6 +60,7 @@ void Game::reset() {
     initStarfield();
     obstacleSpawnTimer = 0;
     fireballSpawnTimer = 0;
+    helicopterSpawntimer = 0;
     stageResetTimer = FRAME_PER_SECOND * 3;
 }
 
@@ -97,15 +105,44 @@ void Game::fireball() {
     fireball->dy = gravity; // Fireball rơi xuống
     fireball->side = SIDE_ALIEN;
     fireball->reload = (rand() % FRAME_PER_SECOND * 2);
-
-    // Cập nhật kích thước của fireball
     SDL_QueryTexture(fireball->texture, NULL, NULL, &fireball->w, &fireball->h);
 }
 
-void Game::fireObstacleBullet(Entity* obstacle) {
+void Game::helicopter() {
+    Entity* helicopter = new Entity();
+    helicopter->initAnimation(helicopterTexture, HELICOPTER_FRAMES, HELICOPTER_CLIPS);
+    helicopters.push_back(helicopter);
+    helicopter->x = rand() % (SCREEN_WIDTH - helicopter->w); // Random vị trí theo chiều ngang
+    helicopter->y = -helicopter->h; // Spawn từ trên trời xuống
+    helicopter->dy = gravity; // Fireball rơi xuống
+    helicopter->side = SIDE_ALIEN;
+    helicopter->reload = (rand() % FRAME_PER_SECOND * 2);
+    helicopter->bullet = 5;
+    SDL_QueryTexture(helicopter->texture, NULL, NULL, &helicopter->w, &helicopter->h);
+}
+
+void Game::doHelicopter() {
+    auto it = helicopters.begin();
+    while (it != helicopters.end()) {
+        auto temp = it++;
+        Entity* helicopter = *temp;
+        helicopter->move();
+        // if (helicopter->bullet < 0) {
+        //     helicopter->dy = -5;
+        // }
+        // if(helicopter->y <= -10){
+        //     helicopters.erase(temp);
+        // }
+    }
+    for (Entity* e : helicopters) {
+        if (player.health > 0 && e->bullet >= 0)
+            enemyfire(e);
+    }
+}
+/*
+void Game::enemyfire(Entity* obstacle) {
     Entity *bullet = new Entity();
     bullets.push_back(bullet);
-
     bullet->x = obstacle->x;
     bullet->y = obstacle->y;
     bullet->health = 1;
@@ -123,22 +160,42 @@ void Game::fireObstacleBullet(Entity* obstacle) {
 
     obstacle->reload = (rand() % FRAME_PER_SECOND * 2);
 }
+*/
+
+void Game::enemyfire(Entity* obstacle) {
+    Entity *bullet = new Entity();
+    bullets.push_back(bullet);
+    bullet->x = obstacle->x;
+    bullet->y = obstacle->y;
+    bullet->health = 1;
+    bullet->texture = bulletTexture;
+    bullet->side = SIDE_ALIEN;
+    SDL_QueryTexture(bullet->texture, NULL, NULL, &bullet->w, &bullet->h);
+
+    bullet->x += (obstacle->w / 2) - (bullet->w / 2);
+    bullet->y += (obstacle->h / 2) - (bullet->h / 2);
+
+    calcSlope(player.x + (player.w / 2), player.y + (player.h / 2),
+              obstacle->x, obstacle->y, &bullet->dx, &bullet->dy);
+    bullet->dx *= OBSTACLE_BULLET_SPEED;
+    bullet->dy *= OBSTACLE_BULLET_SPEED;
+
+    obstacle->bullet--;
+}
+
 
 void Game::doPlayer(int keyboard[]) {
     if (player.health <= 0) {
-        // Player đã chết, không thể di chuyển hoặc bắn
         return;
     }
-    // Reset vận tốc di chuyển của player
-    player.dx = player.dy = 0;
-
+    player.dx = 0;
     if (player.reload > 0) player.reload--;
     // Xử lý di chuyển
-    if (keyboard[SDL_SCANCODE_UP]) player.jump();
+    if (keyboard[SDL_SCANCODE_UP]) player.Startjump();
     if (keyboard[SDL_SCANCODE_LEFT]) player.dx = -PLAYER_SPEED;
     if (keyboard[SDL_SCANCODE_RIGHT]) player.dx = PLAYER_SPEED;
     // Kiểm tra nếu không có phím nào được nhấn thì player dừng lại
-    //if (!keyboard[SDL_SCANCODE_UP] && !keyboard[SDL_SCANCODE_DOWN]) player.dy = 0;
+    if (!keyboard[SDL_SCANCODE_UP]) player.Endjump();
     //if (!keyboard[SDL_SCANCODE_LEFT] && !keyboard[SDL_SCANCODE_RIGHT]) player.dx = 0;
     // Xử lý bắn đạn
     if (keyboard[SDL_SCANCODE_LCTRL] && player.reload == 0) fireBullet();
@@ -156,7 +213,7 @@ void Game::doPlayer(int keyboard[]) {
 bool Game::bulletHitFighter(Entity* bullet) {
         if (player.side != bullet->side && bullet->collides(&player)) {
             // Giảm máu của fighter khi bị đạn trúng
-            player.health -= 1;
+            player.health -= 10;
             return true;
         }
     return false;
@@ -197,14 +254,6 @@ void Game::doFireballs() {
         }
     }
 }
-/*
-void Game::doObstacles() {
-    for (Entity* e : obstacles) {
-        if (e != &player && player.health > 0 && --e->reload <= 0)
-            fireObstacleBullet(e);
-    }
-}
-*/
 
 void Game::doObstacles() {
         auto it = obstacles.begin();
@@ -221,6 +270,13 @@ void Game::doObstacles() {
                 continue;
             }
         }
+}
+
+void Game::spawnHelicopter() {
+    if (--helicopterSpawntimer <= 0) {
+        helicopter();
+        helicopterSpawntimer = 200 + (rand() % 60);
+    }
 }
 
 void Game::spawnObstacles() {
@@ -309,8 +365,10 @@ void Game::doLogic(int keyboard[]) {
     doObstacles();
     doBullets();
     doFireballs();
+    doHelicopter();
     spawnObstacles();
     spawnFireballs();
+    spawnHelicopter();
 }
 
 void Game::drawBackground(SDL_Renderer* renderer) {
@@ -350,6 +408,12 @@ void Game::draw(Graphics& graphics) {
 
     // Vẽ fireballs
     for(Entity* fireball : fireballs) {
+        graphics.renderAnimation(fireball->x, fireball->y, fireball); // Render fireball với clip hiện tại
+        fireball->tick();
+    }
+
+    // Vẽ helicopter
+    for(Entity* fireball : helicopters) {
         graphics.renderAnimation(fireball->x, fireball->y, fireball); // Render fireball với clip hiện tại
         fireball->tick();
     }

@@ -22,6 +22,7 @@ struct Entity {
 	int side;
 	int health;
 	int reload;
+	int bullet;
 	SDL_Texture *texture;
     std::vector<SDL_Rect> clips;
     int currentFrame = 0;
@@ -57,11 +58,25 @@ struct Entity {
 	    y += dy;
 	}
 
+    void Startjump() {
+		if(onGround){
+		dy = -12.0f;
+		onGround = false;
+		}
+    }
+
+	void Endjump() {
+    if (dy < -6.0f)
+        dy = -6.0f;
+	}
+
 	void playermove(){
-		dy += gravity;
+		dy += 0.5f;
 		x += dx;
 		y += dy;
-
+		// cout << dy << endl;
+		// cout << onGround << ' ' << dy << '\n';
+		// if(dy <	 -24.0f) dy = -24.0f;
         // Đảm bảo rằng nhân vật không rơi ra khỏi màn hình
         if (y > FLOOR_Y - h || y <= 0) {
             y = FLOOR_Y - h;
@@ -69,13 +84,6 @@ struct Entity {
             dy = 0;
         }
 	}
-
-    void jump() {
-		if(onGround){
-		dy = -48.0f;
-		onGround = false;
-		}
-    }
 
 	bool offScreen() {
 	     return x < -w || y < -h || x > SCREEN_WIDTH || y > SCREEN_HEIGHT;

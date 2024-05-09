@@ -32,7 +32,20 @@ const int FIREBALL_CLIPS[][4] = {
     {64,0, 32, 32},
     {96,0, 32, 32}
 };
-
 const int FIREBALL_FRAMES = sizeof(FIREBALL_CLIPS)/sizeof(int)/4;
+
+const char* HELICOPTER_SPRITE_FILE = "img\\helicopter_sprite.png";
+const int HELICOPTER_CLIPS[][4] = {
+    {0, 0, 96, 32},
+    {96, 0, 96, 32},
+    {192, 0, 96, 32},
+    {288, 0, 96, 32},
+    {0, 32, 96, 32},
+    {96, 32, 96, 32},
+    {192, 32, 96, 32},
+    {288, 32, 96, 32}
+};
+const int HELICOPTER_FRAMES = sizeof(HELICOPTER_CLIPS)/sizeof(int)/4;
+
 
 #endif

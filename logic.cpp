@@ -16,7 +16,9 @@ void Game::init(Graphics& graphics) {
     player.texture = graphics.loadTexture("img/slime.png");
     SDL_QueryTexture(player.texture, NULL, NULL, &player.w, &player.h);
     bulletTexture = graphics.loadTexture("img/tinyBlackBox.png");
-    obstacleTexture = graphics.loadTexture("img/small_metal_spike.png");
+    obstacleTexture1 = graphics.loadTexture("img/small_metal_spike.png");
+    obstacleTexture2 = graphics.loadTexture("img/small_wood_spike.png");
+    obstacleTexture3 = graphics.loadTexture("img/long_wood_spike.png");
     obstacleBulletTexture = graphics.loadTexture("img/obstacleBullet.png");
     background = graphics.loadTexture("img/1920x1080.png");
     explosionTexture = graphics.loadTexture("img/pngegg.png");
@@ -31,6 +33,7 @@ void Game::init(Graphics& graphics) {
     helicopterTexture = graphics.loadTexture(HELICOPTER_SPRITE_FILE);
     reset();
 }
+
 
 void Game::initPlayer(Entity& player) {
     player.x = 100;
@@ -126,19 +129,20 @@ void Game::doHelicopter() {
     while (it != helicopters.end()) {
         auto temp = it++;
         Entity* helicopter = *temp;
+        if(helicopter->reload > 0) helicopter->reload--;
         helicopter->move();
-        // if (helicopter->bullet < 0) {
-        //     helicopter->dy = -5;
-        // }
-        // if(helicopter->y <= -10){
-        //     helicopters.erase(temp);
-        // }
+        if (helicopter->y >= 100) {
+            helicopter->dy = -1;
+        }
+        if(helicopter->y <= -10){
+            helicopters.erase(temp);
+        }
     }
     for (Entity* e : helicopters) {
-        if (player.health > 0 && e->bullet >= 0)
+        if (player.health > 0 && e->reload <= 0)
             enemyfire(e);
     }
-}
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 /*
 void Game::enemyfire(Entity* obstacle) {
     Entity *bullet = new Entity();
@@ -181,6 +185,7 @@ void Game::enemyfire(Entity* obstacle) {
     bullet->dy *= OBSTACLE_BULLET_SPEED;
 
     obstacle->bullet--;
+    obstacle->reload = (rand() % FRAME_PER_SECOND * 2);
 }
 
 
@@ -198,7 +203,8 @@ void Game::doPlayer(int keyboard[]) {
     if (!keyboard[SDL_SCANCODE_UP]) player.Endjump();
     //if (!keyboard[SDL_SCANCODE_LEFT] && !keyboard[SDL_SCANCODE_RIGHT]) player.dx = 0;
     // Xử lý bắn đạn
-    if (keyboard[SDL_SCANCODE_LCTRL] && player.reload == 0) fireBullet();
+    //if(player.reload > 0) player.reload--;
+    //if (keyboard[SDL_SCANCODE_LCTRL] && player.reload == 0) fireBullet();
     // Di chuyển player dựa trên vận tốc đã thiết lập
     player.playermove();
     // Kiểm tra giới hạn màn hình
@@ -212,7 +218,6 @@ void Game::doPlayer(int keyboard[]) {
 
 bool Game::bulletHitFighter(Entity* bullet) {
         if (player.side != bullet->side && bullet->collides(&player)) {
-            // Giảm máu của fighter khi bị đạn trúng
             player.health -= 10;
             return true;
         }
@@ -221,13 +226,19 @@ bool Game::bulletHitFighter(Entity* bullet) {
 
 bool Game::fireballHitFighter(Entity* fireball) {
     if (player.side != fireball->side && fireball->collides(&player)) {
-        // Giảm máu của player khi bị fireball trúng
         player.health -= 10;
         return true;
     }
     return false;
 }
 
+bool Game::obstacleHitFighter(Entity* obstacle) {
+    if (player.side != obstacle->side && obstacle->collides(&player)) {
+        player.health -= 10;
+        return true;
+    }
+    return false;
+}
 
 void Game::doBullets() {
     auto it = bullets.begin();
@@ -258,11 +269,11 @@ void Game::doFireballs() {
 void Game::doObstacles() {
         auto it = obstacles.begin();
         it++;
-
         while (it != obstacles.end()) {
             auto temp = it++;
             Entity* obstacle = *temp;
             obstacle->move();
+            if(obstacleHitFighter(obstacle)) player.health = 0;
             if (obstacle->x < -obstacle->w) obstacle->health = 0;
             if (obstacle->health == 0) {
                 delete obstacle;
@@ -282,7 +293,18 @@ void Game::spawnHelicopter() {
 void Game::spawnObstacles() {
     if (--obstacleSpawnTimer <= 0) {
         Entity* obstacle = new Entity();
-        obstacle->texture = obstacleTexture;
+        int randomTexture = rand() % 3; 
+        switch (randomTexture) {
+            case 0:
+                obstacle->texture = obstacleTexture1;
+                break;
+            case 1:
+                obstacle->texture = obstacleTexture2;
+                break;
+            case 2:
+                obstacle->texture = obstacleTexture3;
+                break;
+        }
         SDL_QueryTexture(obstacle->texture, NULL, NULL, &obstacle->w, &obstacle->h);
         obstacles.push_back(obstacle);
         obstacle->x = OBSTACLE_X;

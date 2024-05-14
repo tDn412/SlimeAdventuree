@@ -21,7 +21,7 @@ public:
     std::list<Entity*> helicopters;
     Star stars[MAX_STARS];
 
-    SDL_Texture *bulletTexture, *obstacleTexture, *obstacleBulletTexture, *background, *explosionTexture, *fireballTexture, *menuTexture,
+    SDL_Texture *bulletTexture, *obstacleTexture1, *obstacleTexture2, *obstacleTexture3, *obstacleBulletTexture, *background, *explosionTexture, *fireballTexture, *menuTexture,
     *playagainTexture1, *playagainTexture2, *resumeTexture1, *resumeTexture2, *quitTexture1, *quitTexture2, *helicopterTexture;
     int obstacleSpawnTimer;
     int fireballSpawnTimer;
@@ -46,6 +46,7 @@ public:
     void doPlayer(int keyboard[]);
     bool bulletHitFighter(Entity* b);
     bool fireballHitFighter(Entity* b);
+    bool obstacleHitFighter(Entity* b);
     void doBullets();
     void doObstacles();
     void doFireballs();

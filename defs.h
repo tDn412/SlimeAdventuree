@@ -7,10 +7,10 @@
 
 #define PLAYER_SPEED          4
 #define PLAYER_BULLET_SPEED   16
-#define PLAYER_RELOAD          8
+#define PLAYER_RELOAD 40
 #define MAX_KEYBOARD_KEYS 350
 #define FLOOR_Y 560
-#define OBSTACLE_X 1230
+#define OBSTACLE_X 1280
 #define SIDE_PLAYER 0
 #define SIDE_ALIEN  1
 #define gravity 2

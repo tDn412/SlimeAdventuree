@@ -23,7 +23,7 @@ void Game::init(Graphics& graphics) {
     background = graphics.loadTexture("img/1920x1080.png");
     explosionTexture = graphics.loadTexture("img/pngegg.png");
     fireballTexture = graphics.loadTexture(FIREBALL_SPRITE_FILE);
-    menuTexture = graphics.loadTexture("img/menu.png");
+    menuTexture = graphics.loadTexture("img/menuTexture.png");
     resumeTexture1 = graphics.loadTexture("img/resumeTexture1.png");
     resumeTexture2 = graphics.loadTexture("img/resumeTexture2.png");
     playagainTexture1 = graphics.loadTexture("img/playagainTexture1");
@@ -380,7 +380,6 @@ void Game::doLogic(int keyboard[]) {
         reset();
         return;
     }
-
     doBackground();
     doStarfield();
     doPlayer(keyboard);
@@ -405,6 +404,11 @@ void Game::drawBackground(SDL_Renderer* renderer) {
     }
 }
 
+void Game::drawMenu(SDL_Renderer* renderer) {
+    SDL_Rect dest;
+    SDL_RenderCopy(renderer, menuTexture, NULL, &dest);
+}
+
 void Game::drawStarfield(SDL_Renderer* renderer) {
     for (int i = 0; i < MAX_STARS; i++) {
         int c = 32 * stars[i].speed;
@@ -414,9 +418,9 @@ void Game::drawStarfield(SDL_Renderer* renderer) {
 }
 
 void Game::draw(Graphics& graphics) {
-    drawBackground(graphics.renderer);
+    //drawBackground(graphics.renderer);
     drawStarfield(graphics.renderer);
-
+    drawMenu(graphics.renderer);
     // Vẽ player
     graphics.renderTexture(player.texture, player.x, player.y);
 

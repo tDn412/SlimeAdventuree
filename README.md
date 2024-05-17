@@ -5,7 +5,7 @@
     
 (2) Chủ đề game: Slime Adventure
 
-(3) Ngưỡng điểm mong muốn: 8.5
+(3) Ngưỡng điểm mong muốn: 7.5
 
 (4) Lý do:
 

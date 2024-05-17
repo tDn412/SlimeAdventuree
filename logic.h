@@ -5,21 +5,14 @@
 #include <list>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include "defs.h"
 #include "graphics.h"
 #include "structs.h"
 
-enum GameState {
-    MENU,
-    PLAYING,
-    PAUSED,
-    GAME_OVER
-};
-
 class Game {
 public:
-    Game();
-    ~Game();
     void init(Graphics& graphics);
     void reset();
     void doLogic(int keyboard[]);
@@ -28,7 +21,10 @@ public:
     void handleEvents(SDL_Event& event);
 
 private:
+    void loadMusic();
+    void calcSlope(int x1, int y1, int x2, int y2, float *dx, float *dy);
     void initPlayer(Entity& player);
+    void initStarfield();
     void fireBullet();
     void fireball();
     void helicopter();
@@ -49,8 +45,9 @@ private:
     void drawBackground(SDL_Renderer* renderer);
     void drawMenu(SDL_Renderer* renderer);
     void drawStarfield(SDL_Renderer* renderer);
-
-    GameState gameState;
+    void empty(list<Entity*>& entities);
+    
+    Mix_Music* music;
     Entity player;
     std::list<Entity*> obstacles;
     std::list<Entity*> bullets;

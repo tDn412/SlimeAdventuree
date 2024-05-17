@@ -4,13 +4,7 @@
 #include "structs.h"
 #include <iostream>
 
-Game::Game() {
-    // Constructor
-}
 
-Game::~Game() {
-    // Destructor
-}
 
 void Game::init(Graphics& graphics) {
     player.texture = graphics.loadTexture("img/slime.png");
@@ -21,7 +15,6 @@ void Game::init(Graphics& graphics) {
     obstacleTexture3 = graphics.loadTexture("img/long_wood_spike.png");
     obstacleBulletTexture = graphics.loadTexture("img/obstacleBullet.png");
     background = graphics.loadTexture("img/1920x1080.png");
-    explosionTexture = graphics.loadTexture("img/pngegg.png");
     fireballTexture = graphics.loadTexture(FIREBALL_SPRITE_FILE);
     menuTexture = graphics.loadTexture("img/menuTexture.png");
     resumeTexture1 = graphics.loadTexture("img/resumeTexture1.png");
@@ -32,13 +25,26 @@ void Game::init(Graphics& graphics) {
     quitTexture2 = graphics.loadTexture("img/quitTexture2.png");
     helicopterTexture = graphics.loadTexture(HELICOPTER_SPRITE_FILE);
     reset();
+    loadMusic();
+}
+
+void Game::loadMusic() {
+    // Tải nhạc 
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) ;
+    Mix_Music* music = Mix_LoadMUS("music/theme.mp3");
+    Mix_PlayMusic(music, -1);
+
+    // Phát nhạc 
+    if (Mix_PlayMusic(music, -1) == -1) {
+        std::cerr << "Failed to play music: " << Mix_GetError() << std::endl;
+    }
 }
 
 
 void Game::initPlayer(Entity& player) {
     player.x = 100;
     player.y = FLOOR_Y - player.h;
-    player.health = 10; // Khởi tạo máu của player là 10
+    player.health = 10; 
     player.side = SIDE_PLAYER;
     player.reload = 0;
 }
@@ -65,6 +71,8 @@ void Game::reset() {
     fireballSpawnTimer = 0;
     helicopterSpawntimer = 0;
     stageResetTimer = FRAME_PER_SECOND * 3;
+    Mix_HaltMusic();
+    loadMusic();
 }
 
 void Game::empty(std::list<Entity*>& entities) {
@@ -103,9 +111,9 @@ void Game::fireball() {
     Entity* fireball = new Entity();
     fireball->initAnimation(fireballTexture, FIREBALL_FRAMES, FIREBALL_CLIPS);
     fireballs.push_back(fireball);
-    fireball->x = rand() % (SCREEN_WIDTH - fireball->w); // Random vị trí theo chiều ngang
-    fireball->y = -fireball->h; // Spawn từ trên trời xuống
-    fireball->dy = gravity; // Fireball rơi xuống
+    fireball->x = rand() % (SCREEN_WIDTH - fireball->w); 
+    fireball->y = -fireball->h; 
+    fireball->dy = gravity; 
     fireball->side = SIDE_ALIEN;
     fireball->reload = (rand() % FRAME_PER_SECOND * 2);
     SDL_QueryTexture(fireball->texture, NULL, NULL, &fireball->w, &fireball->h);
@@ -115,9 +123,9 @@ void Game::helicopter() {
     Entity* helicopter = new Entity();
     helicopter->initAnimation(helicopterTexture, HELICOPTER_FRAMES, HELICOPTER_CLIPS);
     helicopters.push_back(helicopter);
-    helicopter->x = rand() % (SCREEN_WIDTH - helicopter->w); // Random vị trí theo chiều ngang
-    helicopter->y = -helicopter->h; // Spawn từ trên trời xuống
-    helicopter->dy = gravity; // Fireball rơi xuống
+    helicopter->x = rand() % (SCREEN_WIDTH - helicopter->w); 
+    helicopter->y = -helicopter->h; 
+    helicopter->dy = gravity; 
     helicopter->side = SIDE_ALIEN;
     helicopter->reload = (rand() % FRAME_PER_SECOND * 2);
     helicopter->bullet = 5;
@@ -129,6 +137,7 @@ void Game::doHelicopter() {
     while (it != helicopters.end()) {
         auto temp = it++;
         Entity* helicopter = *temp;
+        helicopter->tick();
         if(helicopter->reload > 0) helicopter->reload--;
         helicopter->move();
         if (helicopter->y >= 100) {
@@ -143,28 +152,6 @@ void Game::doHelicopter() {
             enemyfire(e);
     }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-/*
-void Game::enemyfire(Entity* obstacle) {
-    Entity *bullet = new Entity();
-    bullets.push_back(bullet);
-    bullet->x = obstacle->x;
-    bullet->y = obstacle->y;
-    bullet->health = 1;
-    bullet->texture = bulletTexture;
-    bullet->side = SIDE_ALIEN;
-    SDL_QueryTexture(bullet->texture, NULL, NULL, &bullet->w, &bullet->h);
-
-    bullet->x += (obstacle->w / 2) - (bullet->w / 2);
-    bullet->y += (obstacle->h / 2) - (bullet->h / 2);
-
-    calcSlope(player.x + (player.w / 2), player.y + (player.h / 2),
-              obstacle->x, obstacle->y, &bullet->dx, &bullet->dy);
-    bullet->dx *= OBSTACLE_BULLET_SPEED;
-    bullet->dy *= OBSTACLE_BULLET_SPEED;
-
-    obstacle->reload = (rand() % FRAME_PER_SECOND * 2);
-}
-*/
 
 void Game::enemyfire(Entity* obstacle) {
     Entity *bullet = new Entity();
@@ -195,19 +182,14 @@ void Game::doPlayer(int keyboard[]) {
     }
     player.dx = 0;
     if (player.reload > 0) player.reload--;
-    // Xử lý di chuyển
+    // Di chuyển
     if (keyboard[SDL_SCANCODE_UP]) player.Startjump();
     if (keyboard[SDL_SCANCODE_LEFT]) player.dx = -PLAYER_SPEED;
     if (keyboard[SDL_SCANCODE_RIGHT]) player.dx = PLAYER_SPEED;
-    // Kiểm tra nếu không có phím nào được nhấn thì player dừng lại
     if (!keyboard[SDL_SCANCODE_UP]) player.Endjump();
-    //if (!keyboard[SDL_SCANCODE_LEFT] && !keyboard[SDL_SCANCODE_RIGHT]) player.dx = 0;
-    // Xử lý bắn đạn
-    //if(player.reload > 0) player.reload--;
-    //if (keyboard[SDL_SCANCODE_LCTRL] && player.reload == 0) fireBullet();
-    // Di chuyển player dựa trên vận tốc đã thiết lập
+
     player.playermove();
-    // Kiểm tra giới hạn màn hình
+    // Kiểm tra giới hạn
     if (player.x < 0) player.x = 0;
     else if (player.x >= SCREEN_WIDTH - player.w)
         player.x = SCREEN_WIDTH - player.w;
@@ -313,7 +295,7 @@ void Game::spawnObstacles() {
         obstacle->health = 1;
         obstacle->reload = FRAME_PER_SECOND * (1 + (rand() % 3));
         obstacle->side = SIDE_ALIEN;
-        obstacleSpawnTimer = 30 + (rand() % 60);
+        obstacleSpawnTimer = 60 + (rand() % 60);
     }
 }
 
@@ -323,40 +305,6 @@ void Game::spawnFireballs() {
         fireballSpawnTimer = 30 + (rand() % 60);
     }
 }
-/*
-void Game::doFighters() {
-    auto it = fighters.begin();
-    it++;
-
-    while (it != fighters.end()) {
-        auto temp = it++;
-        Entity* fighter = *temp;
-
-        fighter->move();
-        if (fighter->x < -fighter->w) {
-            // Xóa fighter khi ra khỏi màn hình
-            delete fighter;
-            fighters.erase(temp);
-            continue;
-        }
-
-        if (fighter->health <= 0) {
-            // Nếu máu của fighter hết, xóa fighter
-            delete fighter;
-            fighters.erase(temp);
-            continue;
-        }
-    }
-
-    player.move();
-    if (player.x < 0) player.x = 0;
-    else if (player.x >= SCREEN_WIDTH - player.w)
-        player.x = SCREEN_WIDTH - player.w;
-    if (player.y < 0) player.y = 0;
-    else if (player.y >= SCREEN_HEIGHT - player.h)
-        player.y = SCREEN_HEIGHT - player.h;
-}
-*/
 
 void Game::doBackground() {
     if (--backgroundX < -SCREEN_WIDTH) {
@@ -376,7 +324,6 @@ void Game::doStarfield() {
 
 void Game::doLogic(int keyboard[]) {
     if (player.health <= 0) {
-        // Nếu máu của player hết, reset game
         reset();
         return;
     }
@@ -418,9 +365,10 @@ void Game::drawStarfield(SDL_Renderer* renderer) {
 }
 
 void Game::draw(Graphics& graphics) {
-    //drawBackground(graphics.renderer);
+    drawBackground(graphics.renderer);
     drawStarfield(graphics.renderer);
     drawMenu(graphics.renderer);
+    
     // Vẽ player
     graphics.renderTexture(player.texture, player.x, player.y);
 
@@ -447,5 +395,26 @@ void Game::draw(Graphics& graphics) {
 
 
 void Game::quit() {
-    // Perform any cleanup needed when quitting the game
+    Mix_CloseAudio(); 
+    Mix_Quit();
+
+    for (Entity* obstacle : obstacles) {
+        delete obstacle;
+    }
+    obstacles.clear();
+
+    for (Entity* bullet : bullets) {
+        delete bullet;
+    }
+    bullets.clear();
+
+    for (Entity* fireball : fireballs) {
+        delete fireball;
+    }
+    fireballs.clear();
+
+    for (Entity* helicopter : helicopters) {
+        delete helicopter;
+    }
+    helicopters.clear();
 }

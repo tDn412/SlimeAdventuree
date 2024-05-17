@@ -1,6 +1,8 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include "defs.h"
 #include "input.h"
 #include "graphics.h"
@@ -20,7 +22,7 @@ int main(int argc, char *argv[]) {
     input.init();
     Game game;
     game.init(graphics);
-
+    
     while (1) {
         graphics.prepareScene();
 
@@ -31,7 +33,7 @@ int main(int argc, char *argv[]) {
 
         graphics.presentScene();
 
-        SDL_Delay(1000 / FRAME_PER_SECOND); // Chú ý thời gian delay cho mỗi frame
+        SDL_Delay(1000 / FRAME_PER_SECOND); 
     }
 
     graphics.quit();

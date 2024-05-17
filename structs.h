@@ -74,10 +74,6 @@ struct Entity {
 		dy += 0.5f;
 		x += dx;
 		y += dy;
-		// cout << dy << endl;
-		// cout << onGround << ' ' << dy << '\n';
-		// if(dy <	 -24.0f) dy = -24.0f;
-        // Đảm bảo rằng nhân vật không rơi ra khỏi màn hình
         if (y > FLOOR_Y - h || y <= 0) {
             y = FLOOR_Y - h;
             onGround = true;

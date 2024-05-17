@@ -58,17 +58,16 @@ private:
     SDL_Texture* obstacleTexture1;
     SDL_Texture* obstacleTexture2;
     SDL_Texture* obstacleTexture3;
-    SDL_Texture* obstacleBulletTexture;
-    SDL_Texture* background;
+    SDL_Texture* backgroundTexture;
     SDL_Texture* explosionTexture;
     SDL_Texture* fireballTexture;
-    SDL_Texture* menuTexture;
-    SDL_Texture* resumeTexture1;
-    SDL_Texture* resumeTexture2;
-    SDL_Texture* playagainTexture1;
-    SDL_Texture* playagainTexture2;
-    SDL_Texture* quitTexture1;
-    SDL_Texture* quitTexture2;
+    // SDL_Texture* menuTexture;
+    // SDL_Texture* resumeTexture1;
+    // SDL_Texture* resumeTexture2;
+    // SDL_Texture* playagainTexture1;
+    // SDL_Texture* playagainTexture2;
+    // SDL_Texture* quitTexture1;
+    // SDL_Texture* quitTexture2;
     SDL_Texture* helicopterTexture;
 
     SDL_Rect playButton;

@@ -4,8 +4,6 @@
 #include "structs.h"
 #include <iostream>
 
-
-
 void Game::init(Graphics& graphics) {
     player.texture = graphics.loadTexture("img/slime.png");
     SDL_QueryTexture(player.texture, NULL, NULL, &player.w, &player.h);
@@ -13,16 +11,8 @@ void Game::init(Graphics& graphics) {
     obstacleTexture1 = graphics.loadTexture("img/small_metal_spike.png");
     obstacleTexture2 = graphics.loadTexture("img/small_wood_spike.png");
     obstacleTexture3 = graphics.loadTexture("img/long_wood_spike.png");
-    obstacleBulletTexture = graphics.loadTexture("img/obstacleBullet.png");
-    background = graphics.loadTexture("img/1920x1080.png");
+    backgroundTexture = graphics.loadTexture("img/theme.png");
     fireballTexture = graphics.loadTexture(FIREBALL_SPRITE_FILE);
-    menuTexture = graphics.loadTexture("img/menuTexture.png");
-    resumeTexture1 = graphics.loadTexture("img/resumeTexture1.png");
-    resumeTexture2 = graphics.loadTexture("img/resumeTexture2.png");
-    playagainTexture1 = graphics.loadTexture("img/playagainTexture1");
-    playagainTexture2 = graphics.loadTexture("img/playagainTexture2.png");
-    quitTexture1 = graphics.loadTexture("img/quitTexture1.png");
-    quitTexture2 = graphics.loadTexture("img/quitTexture2.png");
     helicopterTexture = graphics.loadTexture(HELICOPTER_SPRITE_FILE);
     reset();
     loadMusic();
@@ -30,7 +20,7 @@ void Game::init(Graphics& graphics) {
 
 void Game::loadMusic() {
     // Tải nhạc 
-    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) ;
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     Mix_Music* music = Mix_LoadMUS("music/theme.mp3");
     Mix_PlayMusic(music, -1);
 
@@ -39,7 +29,6 @@ void Game::loadMusic() {
         std::cerr << "Failed to play music: " << Mix_GetError() << std::endl;
     }
 }
-
 
 void Game::initPlayer(Entity& player) {
     player.x = 100;
@@ -175,7 +164,6 @@ void Game::enemyfire(Entity* obstacle) {
     obstacle->reload = (rand() % FRAME_PER_SECOND * 2);
 }
 
-
 void Game::doPlayer(int keyboard[]) {
     if (player.health <= 0) {
         return;
@@ -199,10 +187,10 @@ void Game::doPlayer(int keyboard[]) {
 }
 
 bool Game::bulletHitFighter(Entity* bullet) {
-        if (player.side != bullet->side && bullet->collides(&player)) {
-            player.health -= 10;
-            return true;
-        }
+    if (player.side != bullet->side && bullet->collides(&player)) {
+        player.health -= 10;
+        return true;
+    }
     return false;
 }
 
@@ -249,20 +237,20 @@ void Game::doFireballs() {
 }
 
 void Game::doObstacles() {
-        auto it = obstacles.begin();
-        it++;
-        while (it != obstacles.end()) {
-            auto temp = it++;
-            Entity* obstacle = *temp;
-            obstacle->move();
-            if(obstacleHitFighter(obstacle)) player.health = 0;
-            if (obstacle->x < -obstacle->w) obstacle->health = 0;
-            if (obstacle->health == 0) {
-                delete obstacle;
-                obstacles.erase(temp);
-                continue;
-            }
+    auto it = obstacles.begin();
+    it++;
+    while (it != obstacles.end()) {
+        auto temp = it++;
+        Entity* obstacle = *temp;
+        obstacle->move();
+        if (obstacleHitFighter(obstacle)) player.health = 0;
+        if (obstacle->x < -obstacle->w) obstacle->health = 0;
+        if (obstacle->health == 0) {
+            delete obstacle;
+            obstacles.erase(temp);
+            continue;
         }
+    }
 }
 
 void Game::spawnHelicopter() {
@@ -347,13 +335,8 @@ void Game::drawBackground(SDL_Renderer* renderer) {
         dest.w = SCREEN_WIDTH;
         dest.h = SCREEN_HEIGHT;
 
-        SDL_RenderCopy(renderer, background, NULL, &dest);
+        SDL_RenderCopy(renderer, backgroundTexture, NULL, &dest);
     }
-}
-
-void Game::drawMenu(SDL_Renderer* renderer) {
-    SDL_Rect dest;
-    SDL_RenderCopy(renderer, menuTexture, NULL, &dest);
 }
 
 void Game::drawStarfield(SDL_Renderer* renderer) {
@@ -367,7 +350,6 @@ void Game::drawStarfield(SDL_Renderer* renderer) {
 void Game::draw(Graphics& graphics) {
     drawBackground(graphics.renderer);
     drawStarfield(graphics.renderer);
-    drawMenu(graphics.renderer);
     
     // Vẽ player
     graphics.renderTexture(player.texture, player.x, player.y);
@@ -392,7 +374,6 @@ void Game::draw(Graphics& graphics) {
         fireball->tick();
     }
 }
-
 
 void Game::quit() {
     Mix_CloseAudio(); 
